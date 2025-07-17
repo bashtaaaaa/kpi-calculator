@@ -518,7 +518,7 @@
                 <button class="calc-btn" onclick="calculateRU()">🔢 Рассчитать KPI</button>
                 
                 <div id="ru-result" class="result-section">
-                    <div class="result-points" id="ru-points">0</div>
+                    <div class="result-points" id="ru-points">0%</div>
                     <div class="result-status" id="ru-status">Введите данные</div>
                     <div class="result-bonus" id="ru-bonus">0 сом</div>
                 </div>
@@ -632,7 +632,7 @@
                 <button class="calc-btn" onclick="calculateKG()">🔢 Рассчитать KPI</button>
                 
                 <div id="kg-result" class="result-section">
-                    <div class="result-points" id="kg-points">0</div>
+                    <div class="result-points" id="kg-points">0%</div>
                     <div class="result-status" id="kg-status">Введите данные</div>
                     <div class="result-bonus" id="kg-bonus">0 сом</div>
                 </div>
@@ -746,7 +746,7 @@
                 <button class="calc-btn" onclick="calculateScriptwriter()">🔢 Рассчитать KPI</button>
                 
                 <div id="scr-result" class="result-section">
-                    <div class="result-points" id="scr-points">0</div>
+                    <div class="result-points" id="scr-points">0%</div>
                     <div class="result-status" id="scr-status">Введите данные</div>
                     <div class="result-bonus" id="scr-bonus">0 сом</div>
                 </div>
@@ -860,7 +860,7 @@
                 <button class="calc-btn" onclick="calculateOperator()">🔢 Рассчитать KPI</button>
                 
                 <div id="op-result" class="result-section">
-                    <div class="result-points" id="op-points">0</div>
+                    <div class="result-points" id="op-points">0%</div>
                     <div class="result-status" id="op-status">Введите данные</div>
                     <div class="result-bonus" id="op-bonus">0 сом</div>
                 </div>
@@ -974,7 +974,7 @@
                 <button class="calc-btn" onclick="calculateSMM()">🔢 Рассчитать KPI</button>
                 
                 <div id="smm-result" class="result-section">
-                    <div class="result-points" id="smm-points">0</div>
+                    <div class="result-points" id="smm-points">0%</div>
                     <div class="result-status" id="smm-status">Введите данные</div>
                     <div class="result-bonus" id="smm-bonus">0 сом</div>
                 </div>
@@ -1088,7 +1088,7 @@
                 <button class="calc-btn" onclick="calculateCommerce()">🔢 Рассчитать KPI</button>
                 
                 <div id="com-result" class="result-section">
-                    <div class="result-points" id="com-points">0</div>
+                    <div class="result-points" id="com-points">0%</div>
                     <div class="result-status" id="com-status">Введите данные</div>
                     <div class="result-bonus" id="com-bonus">0 сом</div>
                 </div>
@@ -1172,7 +1172,7 @@
                 <button class="calc-btn" onclick="calculateFactchecker()">🔢 Рассчитать KPI</button>
                 
                 <div id="fact-result" class="result-section">
-                    <div class="result-points" id="fact-points">0</div>
+                    <div class="result-points" id="fact-points">0%</div>
                     <div class="result-status" id="fact-status">Введите данные</div>
                     <div class="result-bonus" id="fact-bonus">0 сом</div>
                 </div>
@@ -1268,6 +1268,7 @@
             <p><strong>Формула итогового балла:</strong> Σ(KPI_балл × KPI_вес)</p>
             <p><strong>Расчет баллов за KPI:</strong> Если результат ≥ минимума, то балл = (результат ÷ минимум) × базовые_баллы</p>
             <p><strong>Максимальный балл:</strong> 130% от базовых баллов (при достижении уровня "Отлично")</p>
+            <p><strong>Бонусы:</strong> Выплачиваются только за превышение плана (100%+) с шагом 10% по 5-10 тысяч сом</p>
             <p><strong>Источники данных:</strong> Instagram Insights, внутренняя система учета, CRM</p>
         </div>
         
@@ -1302,14 +1303,22 @@
         
         // Функции расчета KPI
         function calculateKPI(actual, minimum, target, excellent, maxPoints) {
+            if (actual <= 0) return 0;
+            
             if (actual >= excellent) {
-                return Math.min(maxPoints * 1.3, maxPoints * (actual / minimum));
+                // Превышение отличного уровня - максимум 130%
+                return Math.min(maxPoints * 1.3, maxPoints * (actual / target));
             } else if (actual >= target) {
-                return maxPoints * (actual / minimum);
+                // Между целью и отличным - 100-120%
+                const ratio = (actual - target) / (excellent - target);
+                return maxPoints * (1 + ratio * 0.2);
             } else if (actual >= minimum) {
-                return maxPoints * 0.8 * (actual / minimum);
+                // Между минимумом и целью - 80-100%
+                const ratio = (actual - minimum) / (target - minimum);
+                return maxPoints * (0.8 + ratio * 0.2);
             } else {
-                return maxPoints * 0.5 * (actual / minimum);
+                // Ниже минимума - пропорционально снижение
+                return Math.max(0, maxPoints * 0.8 * (actual / minimum));
             }
         }
         
@@ -1341,25 +1350,29 @@
             const growth = parseFloat(document.getElementById('ru-growth').value) || 0;
             const schedule = parseFloat(document.getElementById('ru-schedule').value) || 0;
             
-            const engagementPoints = calculateKPI(engagement, 3, 5, 7, 30) * 0.3;
-            const reachPoints = calculateKPI(reach, 40, 50, 70, 30) * 0.3;
-            const materialsPoints = calculateKPI(materials, 10, 12, 15, 20) * 0.2;
-            const growthPoints = calculateKPI(growth, 400, 500, 800, 10) * 0.1;
-            const schedulePoints = calculateKPI(schedule, 90, 95, 100, 10) * 0.1;
+            // Расчет баллов для каждого KPI
+            const engagementPoints = calculateKPI(engagement, 3, 5, 7, 30);
+            const reachPoints = calculateKPI(reach, 40, 50, 70, 30);
+            const materialsPoints = calculateKPI(materials, 10, 12, 15, 20);
+            const growthPoints = calculateKPI(growth, 400, 500, 800, 10);
+            const schedulePoints = calculateKPI(schedule, 90, 95, 100, 10);
             
-            const totalPoints = Math.round(engagementPoints + reachPoints + materialsPoints + growthPoints + schedulePoints);
-            const percentage = Math.round((totalPoints / 100) * 100);
+            // Сначала считаем общий балл, потом переводим в процент
+            const totalPoints = engagementPoints + reachPoints + materialsPoints + growthPoints + schedulePoints;
+            
+            // Итоговый процент выполнения (100 баллов = 100%)
+            const percentage = Math.round(totalPoints);
             
             const status = getStatus(percentage);
             const bonus = getBonus(percentage);
             
-            document.getElementById('ru-points').textContent = totalPoints;
+            document.getElementById('ru-points').textContent = percentage + '%';
             document.getElementById('ru-status').textContent = status.text;
             document.getElementById('ru-bonus').textContent = bonus.toLocaleString() + ' сом';
             document.getElementById('ru-result').classList.add('show');
         }
         
-        // Редактор KG
+        // Применить те же изменения ко всем остальным функциям
         function calculateKG() {
             const engagement = parseFloat(document.getElementById('kg-engagement').value) || 0;
             const reach = parseFloat(document.getElementById('kg-reach').value) || 0;
@@ -1367,22 +1380,145 @@
             const growth = parseFloat(document.getElementById('kg-growth').value) || 0;
             const schedule = parseFloat(document.getElementById('kg-schedule').value) || 0;
             
-            const engagementPoints = calculateKPI(engagement, 4, 5, 7, 30) * 0.3;
-            const reachPoints = calculateKPI(reach, 25, 35, 50, 30) * 0.3;
-            const materialsPoints = calculateKPI(materials, 6, 7, 9, 20) * 0.2;
-            const growthPoints = calculateKPI(growth, 200, 300, 500, 10) * 0.1;
-            const schedulePoints = calculateKPI(schedule, 90, 95, 100, 10) * 0.1;
+            const engagementPoints = calculateKPI(engagement, 4, 5, 7, 30);
+            const reachPoints = calculateKPI(reach, 25, 35, 50, 30);
+            const materialsPoints = calculateKPI(materials, 6, 7, 9, 20);
+            const growthPoints = calculateKPI(growth, 200, 300, 500, 10);
+            const schedulePoints = calculateKPI(schedule, 90, 95, 100, 10);
             
-            const totalPoints = Math.round(engagementPoints + reachPoints + materialsPoints + growthPoints + schedulePoints);
-            const percentage = Math.round((totalPoints / 100) * 100);
+            const totalPoints = engagementPoints + reachPoints + materialsPoints + growthPoints + schedulePoints;
+            const percentage = Math.round(totalPoints);
             
             const status = getStatus(percentage);
             const bonus = getBonus(percentage);
             
-            document.getElementById('kg-points').textContent = totalPoints;
+            document.getElementById('kg-points').textContent = percentage + '%';
             document.getElementById('kg-status').textContent = status.text;
             document.getElementById('kg-bonus').textContent = bonus.toLocaleString() + ' сом';
             document.getElementById('kg-result').classList.add('show');
+        }
+        
+        function calculateScriptwriter() {
+            const quality = parseFloat(document.getElementById('scr-quality').value) || 0;
+            const count = parseFloat(document.getElementById('scr-count').value) || 0;
+            const accepted = parseFloat(document.getElementById('scr-accepted').value) || 0;
+            const creative = parseFloat(document.getElementById('scr-creative').value) || 0;
+            const deadline = parseFloat(document.getElementById('scr-deadline').value) || 0;
+            
+            const qualityPoints = calculateKPI(quality, 7, 8, 9, 30);
+            const countPoints = calculateKPI(count, 6, 8, 10, 20);
+            const acceptedPoints = calculateKPI(accepted, 80, 90, 95, 20);
+            const creativePoints = calculateKPI(creative, 3, 4, 6, 20);
+            const deadlinePoints = calculateKPI(deadline, 85, 95, 100, 10);
+            
+            const totalPoints = qualityPoints + countPoints + acceptedPoints + creativePoints + deadlinePoints;
+            const percentage = Math.round(totalPoints);
+            
+            const status = getStatus(percentage);
+            const bonus = getBonus(percentage);
+            
+            document.getElementById('scr-points').textContent = percentage + '%';
+            document.getElementById('scr-status').textContent = status.text;
+            document.getElementById('scr-bonus').textContent = bonus.toLocaleString() + ' сом';
+            document.getElementById('scr-result').classList.add('show');
+        }
+        
+        function calculateOperator() {
+            const time = parseFloat(document.getElementById('op-time').value) || 0;
+            const count = parseFloat(document.getElementById('op-count').value) || 0;
+            const quality = parseFloat(document.getElementById('op-quality').value) || 0;
+            const creativity = parseFloat(document.getElementById('op-creativity').value) || 0;
+            const deadline = parseFloat(document.getElementById('op-deadline').value) || 0;
+            
+            // Для времени - инвертируем (меньше = лучше)
+            const timeValue = time > 0 ? Math.max(0, 2 - time) : 0;
+            const timePoints = calculateKPI(timeValue, 0.5, 1, 1.5, 30);
+            const countPoints = calculateKPI(count, 6, 8, 10, 20);
+            const qualityPoints = calculateKPI(quality, 7, 8, 9, 20);
+            const creativityPoints = calculateKPI(creativity, 7, 8, 9, 20);
+            const deadlinePoints = calculateKPI(deadline, 85, 95, 100, 10);
+            
+            const totalPoints = timePoints + countPoints + qualityPoints + creativityPoints + deadlinePoints;
+            const percentage = Math.round(totalPoints);
+            
+            const status = getStatus(percentage);
+            const bonus = getBonus(percentage);
+            
+            document.getElementById('op-points').textContent = percentage + '%';
+            document.getElementById('op-status').textContent = status.text;
+            document.getElementById('op-bonus').textContent = bonus.toLocaleString() + ' сом';
+            document.getElementById('op-result').classList.add('show');
+        }
+        
+        function calculateSMM() {
+            const quality = parseFloat(document.getElementById('smm-quality').value) || 0;
+            const growth = parseFloat(document.getElementById('smm-growth').value) || 0;
+            const stories = parseFloat(document.getElementById('smm-stories').value) || 0;
+            const reports = parseFloat(document.getElementById('smm-reports').value) || 0;
+            const schedule = parseFloat(document.getElementById('smm-schedule').value) || 0;
+            
+            const qualityPoints = calculateKPI(quality, 70, 80, 90, 30);
+            const growthPoints = calculateKPI(growth, 8, 10, 15, 30);
+            const storiesPoints = calculateKPI(stories, 12, 15, 20, 20);
+            const reportsPoints = calculateKPI(reports, 80, 90, 95, 10);
+            const schedulePoints = calculateKPI(schedule, 90, 95, 100, 10);
+            
+            const totalPoints = qualityPoints + growthPoints + storiesPoints + reportsPoints + schedulePoints;
+            const percentage = Math.round(totalPoints);
+            
+            const status = getStatus(percentage);
+            const bonus = getBonus(percentage);
+            
+            document.getElementById('smm-points').textContent = percentage + '%';
+            document.getElementById('smm-status').textContent = status.text;
+            document.getElementById('smm-bonus').textContent = bonus.toLocaleString() + ' сом';
+            document.getElementById('smm-result').classList.add('show');
+        }
+        
+        function calculateCommerce() {
+            const revenue = parseFloat(document.getElementById('com-revenue').value) || 0;
+            const meetings = parseFloat(document.getElementById('com-meetings').value) || 0;
+            const conversion = parseFloat(document.getElementById('com-conversion').value) || 0;
+            const deadline = parseFloat(document.getElementById('com-deadline').value) || 0;
+            const reports = parseFloat(document.getElementById('com-reports').value) || 0;
+            
+            const revenuePoints = calculateKPI(revenue, 2000, 2500, 3500, 40);
+            const meetingsPoints = calculateKPI(meetings, 2, 3, 5, 20);
+            const conversionPoints = calculateKPI(conversion, 25, 30, 40, 20);
+            const deadlinePoints = calculateKPI(deadline, 85, 95, 100, 10);
+            const reportsPoints = calculateKPI(reports, 80, 90, 95, 10);
+            
+            const totalPoints = revenuePoints + meetingsPoints + conversionPoints + deadlinePoints + reportsPoints;
+            const percentage = Math.round(totalPoints);
+            
+            const status = getStatus(percentage);
+            const bonus = getBonus(percentage);
+            
+            document.getElementById('com-points').textContent = percentage + '%';
+            document.getElementById('com-status').textContent = status.text;
+            document.getElementById('com-bonus').textContent = bonus.toLocaleString() + ' сом';
+            document.getElementById('com-result').classList.add('show');
+        }
+        
+        function calculateFactchecker() {
+            const coverage = parseFloat(document.getElementById('fact-coverage').value) || 0;
+            const quality = parseFloat(document.getElementById('fact-quality').value) || 0;
+            const timing = parseFloat(document.getElementById('fact-timing').value) || 0;
+            
+            const coveragePoints = calculateKPI(coverage, 95, 100, 100, 40);
+            const qualityPoints = calculateKPI(quality, 70, 80, 90, 30);
+            const timingPoints = calculateKPI(timing, 85, 95, 100, 30);
+            
+            const totalPoints = coveragePoints + qualityPoints + timingPoints;
+            const percentage = Math.round(totalPoints);
+            
+            const status = getStatus(percentage);
+            const bonus = getBonus(percentage);
+            
+            document.getElementById('fact-points').textContent = percentage + '%';
+            document.getElementById('fact-status').textContent = status.text;
+            document.getElementById('fact-bonus').textContent = bonus.toLocaleString() + ' сом';
+            document.getElementById('fact-result').classList.add('show');
         }
         
         // Сценарист
@@ -1393,19 +1529,19 @@
             const creative = parseFloat(document.getElementById('scr-creative').value) || 0;
             const deadline = parseFloat(document.getElementById('scr-deadline').value) || 0;
             
-            const qualityPoints = calculateKPI(quality, 7, 8, 9, 30) * 0.3;
-            const countPoints = calculateKPI(count, 6, 8, 10, 20) * 0.2;
-            const acceptedPoints = calculateKPI(accepted, 80, 90, 95, 20) * 0.2;
-            const creativePoints = calculateKPI(creative, 3, 4, 6, 20) * 0.2;
-            const deadlinePoints = calculateKPI(deadline, 85, 95, 100, 10) * 0.1;
+            const qualityPoints = calculateKPI(quality, 7, 8, 9, 30);
+            const countPoints = calculateKPI(count, 6, 8, 10, 20);
+            const acceptedPoints = calculateKPI(accepted, 80, 90, 95, 20);
+            const creativePoints = calculateKPI(creative, 3, 4, 6, 20);
+            const deadlinePoints = calculateKPI(deadline, 85, 95, 100, 10);
             
-            const totalPoints = Math.round(qualityPoints + countPoints + acceptedPoints + creativePoints + deadlinePoints);
-            const percentage = Math.round((totalPoints / 100) * 100);
+            const totalPoints = qualityPoints + countPoints + acceptedPoints + creativePoints + deadlinePoints;
+            const percentage = Math.round(totalPoints);
             
             const status = getStatus(percentage);
             const bonus = getBonus(percentage);
             
-            document.getElementById('scr-points').textContent = totalPoints;
+            document.getElementById('scr-points').textContent = percentage + '%';
             document.getElementById('scr-status').textContent = status.text;
             document.getElementById('scr-bonus').textContent = bonus.toLocaleString() + ' сом';
             document.getElementById('scr-result').classList.add('show');
@@ -1419,20 +1555,21 @@
             const creativity = parseFloat(document.getElementById('op-creativity').value) || 0;
             const deadline = parseFloat(document.getElementById('op-deadline').value) || 0;
             
-            // Для времени - меньше лучше
-            const timePoints = calculateKPI(2 - time, 0.5, 1, 1.5, 30) * 0.3;
-            const countPoints = calculateKPI(count, 6, 8, 10, 20) * 0.2;
-            const qualityPoints = calculateKPI(quality, 7, 8, 9, 20) * 0.2;
-            const creativityPoints = calculateKPI(creativity, 7, 8, 9, 20) * 0.2;
-            const deadlinePoints = calculateKPI(deadline, 85, 95, 100, 10) * 0.1;
+            // Для времени - инвертируем (меньше = лучше)
+            const timeValue = time > 0 ? Math.max(0, 2 - time) : 0;
+            const timePoints = calculateKPI(timeValue, 0.5, 1, 1.5, 30);
+            const countPoints = calculateKPI(count, 6, 8, 10, 20);
+            const qualityPoints = calculateKPI(quality, 7, 8, 9, 20);
+            const creativityPoints = calculateKPI(creativity, 7, 8, 9, 20);
+            const deadlinePoints = calculateKPI(deadline, 85, 95, 100, 10);
             
-            const totalPoints = Math.round(timePoints + countPoints + qualityPoints + creativityPoints + deadlinePoints);
-            const percentage = Math.round((totalPoints / 100) * 100);
+            const totalPoints = timePoints + countPoints + qualityPoints + creativityPoints + deadlinePoints;
+            const percentage = Math.round(totalPoints);
             
             const status = getStatus(percentage);
             const bonus = getBonus(percentage);
             
-            document.getElementById('op-points').textContent = totalPoints;
+            document.getElementById('op-points').textContent = percentage + '%';
             document.getElementById('op-status').textContent = status.text;
             document.getElementById('op-bonus').textContent = bonus.toLocaleString() + ' сом';
             document.getElementById('op-result').classList.add('show');
@@ -1446,19 +1583,19 @@
             const reports = parseFloat(document.getElementById('smm-reports').value) || 0;
             const schedule = parseFloat(document.getElementById('smm-schedule').value) || 0;
             
-            const qualityPoints = calculateKPI(quality, 70, 80, 90, 30) * 0.3;
-            const growthPoints = calculateKPI(growth, 8, 10, 15, 30) * 0.3;
-            const storiesPoints = calculateKPI(stories, 12, 15, 20, 20) * 0.2;
-            const reportsPoints = calculateKPI(reports, 80, 90, 95, 10) * 0.1;
-            const schedulePoints = calculateKPI(schedule, 90, 95, 100, 10) * 0.1;
+            const qualityPoints = calculateKPI(quality, 70, 80, 90, 30);
+            const growthPoints = calculateKPI(growth, 8, 10, 15, 30);
+            const storiesPoints = calculateKPI(stories, 12, 15, 20, 20);
+            const reportsPoints = calculateKPI(reports, 80, 90, 95, 10);
+            const schedulePoints = calculateKPI(schedule, 90, 95, 100, 10);
             
-            const totalPoints = Math.round(qualityPoints + growthPoints + storiesPoints + reportsPoints + schedulePoints);
-            const percentage = Math.round((totalPoints / 100) * 100);
+            const totalPoints = qualityPoints + growthPoints + storiesPoints + reportsPoints + schedulePoints;
+            const percentage = Math.round(totalPoints);
             
             const status = getStatus(percentage);
             const bonus = getBonus(percentage);
             
-            document.getElementById('smm-points').textContent = totalPoints;
+            document.getElementById('smm-points').textContent = percentage + '%';
             document.getElementById('smm-status').textContent = status.text;
             document.getElementById('smm-bonus').textContent = bonus.toLocaleString() + ' сом';
             document.getElementById('smm-result').classList.add('show');
@@ -1472,19 +1609,19 @@
             const deadline = parseFloat(document.getElementById('com-deadline').value) || 0;
             const reports = parseFloat(document.getElementById('com-reports').value) || 0;
             
-            const revenuePoints = calculateKPI(revenue, 2000, 2500, 3500, 40) * 0.4;
-            const meetingsPoints = calculateKPI(meetings, 2, 3, 5, 20) * 0.2;
-            const conversionPoints = calculateKPI(conversion, 25, 30, 40, 20) * 0.2;
-            const deadlinePoints = calculateKPI(deadline, 85, 95, 100, 10) * 0.1;
-            const reportsPoints = calculateKPI(reports, 80, 90, 95, 10) * 0.1;
+            const revenuePoints = calculateKPI(revenue, 2000, 2500, 3500, 40);
+            const meetingsPoints = calculateKPI(meetings, 2, 3, 5, 20);
+            const conversionPoints = calculateKPI(conversion, 25, 30, 40, 20);
+            const deadlinePoints = calculateKPI(deadline, 85, 95, 100, 10);
+            const reportsPoints = calculateKPI(reports, 80, 90, 95, 10);
             
-            const totalPoints = Math.round(revenuePoints + meetingsPoints + conversionPoints + deadlinePoints + reportsPoints);
-            const percentage = Math.round((totalPoints / 100) * 100);
+            const totalPoints = revenuePoints + meetingsPoints + conversionPoints + deadlinePoints + reportsPoints;
+            const percentage = Math.round(totalPoints);
             
             const status = getStatus(percentage);
             const bonus = getBonus(percentage);
             
-            document.getElementById('com-points').textContent = totalPoints;
+            document.getElementById('com-points').textContent = percentage + '%';
             document.getElementById('com-status').textContent = status.text;
             document.getElementById('com-bonus').textContent = bonus.toLocaleString() + ' сом';
             document.getElementById('com-result').classList.add('show');
@@ -1496,17 +1633,140 @@
             const quality = parseFloat(document.getElementById('fact-quality').value) || 0;
             const timing = parseFloat(document.getElementById('fact-timing').value) || 0;
             
-            const coveragePoints = calculateKPI(coverage, 95, 100, 100, 40) * 0.4;
-            const qualityPoints = calculateKPI(quality, 70, 80, 90, 30) * 0.3;
-            const timingPoints = calculateKPI(timing, 85, 95, 100, 30) * 0.3;
+            const coveragePoints = calculateKPI(coverage, 95, 100, 100, 40);
+            const qualityPoints = calculateKPI(quality, 70, 80, 90, 30);
+            const timingPoints = calculateKPI(timing, 85, 95, 100, 30);
             
-            const totalPoints = Math.round(coveragePoints + qualityPoints + timingPoints);
-            const percentage = Math.round((totalPoints / 100) * 100);
+            const totalPoints = coveragePoints + qualityPoints + timingPoints;
+            const percentage = Math.round(totalPoints);
             
             const status = getStatus(percentage);
             const bonus = getBonus(percentage);
             
-            document.getElementById('fact-points').textContent = totalPoints;
+            document.getElementById('fact-points').textContent = percentage + '%';
+            document.getElementById('fact-status').textContent = status.text;
+            document.getElementById('fact-bonus').textContent = bonus.toLocaleString() + ' сом';
+            document.getElementById('fact-result').classList.add('show');
+        }
+        
+        // Оператор
+        function calculateOperator() {
+            const time = parseFloat(document.getElementById('op-time').value) || 0;
+            const count = parseFloat(document.getElementById('op-count').value) || 0;
+            const quality = parseFloat(document.getElementById('op-quality').value) || 0;
+            const creativity = parseFloat(document.getElementById('op-creativity').value) || 0;
+            const deadline = parseFloat(document.getElementById('op-deadline').value) || 0;
+            
+            // Для времени - меньше лучше (инвертируем)
+            const timePoints = calculateKPI(2 - time, 0.5, 1, 1.5, 30);
+            const countPoints = calculateKPI(count, 6, 8, 10, 20);
+            const qualityPoints = calculateKPI(quality, 7, 8, 9, 20);
+            const creativityPoints = calculateKPI(creativity, 7, 8, 9, 20);
+            const deadlinePoints = calculateKPI(deadline, 85, 95, 100, 10);
+            
+            const totalWeightedPoints = 
+                timePoints * 0.3 + 
+                countPoints * 0.2 + 
+                qualityPoints * 0.2 + 
+                creativityPoints * 0.2 + 
+                deadlinePoints * 0.1;
+            
+            const percentage = Math.round(totalWeightedPoints);
+            
+            const status = getStatus(percentage);
+            const bonus = getBonus(percentage);
+            
+            document.getElementById('op-points').textContent = percentage + '%';
+            document.getElementById('op-status').textContent = status.text;
+            document.getElementById('op-bonus').textContent = bonus.toLocaleString() + ' сом';
+            document.getElementById('op-result').classList.add('show');
+        }
+        
+        // SMM
+        function calculateSMM() {
+            const quality = parseFloat(document.getElementById('smm-quality').value) || 0;
+            const growth = parseFloat(document.getElementById('smm-growth').value) || 0;
+            const stories = parseFloat(document.getElementById('smm-stories').value) || 0;
+            const reports = parseFloat(document.getElementById('smm-reports').value) || 0;
+            const schedule = parseFloat(document.getElementById('smm-schedule').value) || 0;
+            
+            const qualityPoints = calculateKPI(quality, 70, 80, 90, 30);
+            const growthPoints = calculateKPI(growth, 8, 10, 15, 30);
+            const storiesPoints = calculateKPI(stories, 12, 15, 20, 20);
+            const reportsPoints = calculateKPI(reports, 80, 90, 95, 10);
+            const schedulePoints = calculateKPI(schedule, 90, 95, 100, 10);
+            
+            const totalWeightedPoints = 
+                qualityPoints * 0.3 + 
+                growthPoints * 0.3 + 
+                storiesPoints * 0.2 + 
+                reportsPoints * 0.1 + 
+                schedulePoints * 0.1;
+            
+            const percentage = Math.round(totalWeightedPoints);
+            
+            const status = getStatus(percentage);
+            const bonus = getBonus(percentage);
+            
+            document.getElementById('smm-points').textContent = percentage + '%';
+            document.getElementById('smm-status').textContent = status.text;
+            document.getElementById('smm-bonus').textContent = bonus.toLocaleString() + ' сом';
+            document.getElementById('smm-result').classList.add('show');
+        }
+        
+        // Коммерция
+        function calculateCommerce() {
+            const revenue = parseFloat(document.getElementById('com-revenue').value) || 0;
+            const meetings = parseFloat(document.getElementById('com-meetings').value) || 0;
+            const conversion = parseFloat(document.getElementById('com-conversion').value) || 0;
+            const deadline = parseFloat(document.getElementById('com-deadline').value) || 0;
+            const reports = parseFloat(document.getElementById('com-reports').value) || 0;
+            
+            const revenuePoints = calculateKPI(revenue, 2000, 2500, 3500, 40);
+            const meetingsPoints = calculateKPI(meetings, 2, 3, 5, 20);
+            const conversionPoints = calculateKPI(conversion, 25, 30, 40, 20);
+            const deadlinePoints = calculateKPI(deadline, 85, 95, 100, 10);
+            const reportsPoints = calculateKPI(reports, 80, 90, 95, 10);
+            
+            const totalWeightedPoints = 
+                revenuePoints * 0.4 + 
+                meetingsPoints * 0.2 + 
+                conversionPoints * 0.2 + 
+                deadlinePoints * 0.1 + 
+                reportsPoints * 0.1;
+            
+            const percentage = Math.round(totalWeightedPoints);
+            
+            const status = getStatus(percentage);
+            const bonus = getBonus(percentage);
+            
+            document.getElementById('com-points').textContent = percentage + '%';
+            document.getElementById('com-status').textContent = status.text;
+            document.getElementById('com-bonus').textContent = bonus.toLocaleString() + ' сом';
+            document.getElementById('com-result').classList.add('show');
+        }
+        
+        // Фактчекер
+        function calculateFactchecker() {
+            const coverage = parseFloat(document.getElementById('fact-coverage').value) || 0;
+            const quality = parseFloat(document.getElementById('fact-quality').value) || 0;
+            const timing = parseFloat(document.getElementById('fact-timing').value) || 0;
+            
+            const coveragePoints = calculateKPI(coverage, 95, 100, 100, 40);
+            const qualityPoints = calculateKPI(quality, 70, 80, 90, 30);
+            const timingPoints = calculateKPI(timing, 85, 95, 100, 30);
+            
+            const totalWeightedPoints = 
+                coveragePoints * 0.4 + 
+                qualityPoints * 0.3 + 
+                timingPoints * 0.3;
+            
+            const percentage = Math.round(totalWeightedPoints);
+            
+            const status = getStatus(percentage);
+            const bonus = getBonus(percentage);
+            
+            document.getElementById('fact-points').textContent = percentage + '%';
             document.getElementById('fact-status').textContent = status.text;
             document.getElementById('fact-bonus').textContent = bonus.toLocaleString() + ' сом';
             document.getElementById('fact-result').classList.add('show');
