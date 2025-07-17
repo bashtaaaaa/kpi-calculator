@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPI Калькулятор Bashta Media</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            background: #4CAF50;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .position-selector {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+        }
+        .position-selector select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .calculator {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .calculator.active {
+            display: block;
+        }
+        .kpi-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+        }
+        .kpi-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .kpi-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .kpi-input {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .total-section {
+            background: #2196F3;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .total-points {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .bonus-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .bonus-amount {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 KPI Калькулятор Bashta Media</h1>
+        <p>Система оценки эффективности сотрудников</p>
+    </div>
+    
+    <div class="position-selector">
+        <label for="position"><strong>Выберите позицию:</strong></label>
+        <select id="position" onchange="showCalculator()">
+            <option value="">-- Выберите позицию --</option>
+            <option value="editor-ru">Редактор/ка (Русский)</option>
+            <option value="editor-kg">Редактор/ка (Кыргызский)</option>
+            <option value="scriptwriter">Сценарист/ка</option>
+            <option value="operator">Оператор/ка-монтажер/ка</option>
+            <option value="smm">SMM-менеджер/ка</option>
+            <option value="commerce">Рекламная менеджер/ка</option>
+            <option value="factchecker">Фактчекер/ка</option>
+        </select>
+    </div>
+    
+    <!-- Редактор русский -->
+    <div id="editor-ru" class="calculator">
+        <h2>📝 Редактор/ка (Русский контент)</h2>
+        
+        <div class="kpi-item">
+            <div class="kpi-name">Вовлеченность аудитории</div>
+            <div class="kpi-description">Минимум: 5% ER в месяц (30 баллов)</div>
+            <input type="number" class="kpi-input" id="ru-engagement" placeholder="%" step="0.1">
+        </div>
+        
+        <div class="kpi-item">
+            <div class="kpi-name">Охваты</div>
+            <div class="kpi-description">Минимум: 50,000 просмотров на пост (30 баллов)</div>
+            <input type="number" class="kpi-input" id="ru-views" placeholder="просмотры">
+        </div>
+        
+        <div class="kpi-item">
+            <div class="kpi-name">Количество материалов</div>
+            <div class="kpi-description">Минимум: 12 материалов в месяц (20 баллов)</div>
+            <input type="number" class="kpi-input" id="ru-materials" placeholder="материалы">
+        </div>
+        
+        <div class="kpi-item">
+            <div class="kpi-name">Рост аудитории</div>
+            <div class="kpi-description">Минимум: 1000 подписчиков в месяц (10 баллов)</div>
+            <input type="number" class="kpi-input" id="ru-growth" placeholder="подписчики">
+        </div>
+        
+        <div class="kpi-item">
+            <div class="kpi-name">Соблюдение контент-плана</div>
+            <div class="kpi-description">Минимум: 100% публикаций вовремя (10 баллов)</div>
+            <input type="number" class="kpi-input" id="ru-schedule" placeholder="%" max="100">
+        </div>
+        
+        <button onclick="calculateRU()" style="background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Рассчитать</button>
+        
+        <div class="total-section">
+            <div class="total-points" id="ru-total">0 баллов</div>
+            <div id="ru-percentage">0%</div>
+        </div>
+        
+        <div class="bonus-section">
+            <h3>💰 Бонус за месяц:</h3>
+            <div class="bonus-amount" id="ru-bonus">0 сом</div>
+        </div>
+    </div>
+    
+    <!-- Редактор кыргызский -->
+    <div id="editor-kg" class="calculator">
+        <h2>📝 Редактор/ка (Кыргызский контент)</h2>
+        
+        <div class="kpi-item">
+            <div class="kpi-name">Вовлеченность аудитории</div>
+            <div class="kpi-description">Минимум: 5% ER в месяц (30 баллов)</div>
+            <input type="number" class="kpi-input" id="kg-engagement" placeholder="%" step="0.1">
+        </div>
+        
+        <div class="kpi-item">
+            <div class="kpi-name">Охваты</div>
+            <div class="kpi-description">Минимум: 50,000 просмотров на пост (30 баллов)</div>
+            <input type="number" class="kpi-input" id="kg-views" placeholder="просмотры">
+        </div>
+        
+        <div class="kpi-item">
+            <div class="kpi-name">Количество материалов</div>
+            <div class="kpi-description">Минимум: 7 материалов в месяц (20 баллов)</div>
+            <input type="number" class="kpi-input" id="kg-materials" placeholder="материалы">
+        </div>
+        
+        <div class="kpi-item">
+            <div class="kpi-name">Рост аудитории</div>
+            <div class="kpi-description">Минимум: 1000 подписчиков в месяц (10 баллов)</div>
+            <input type="number" class="kpi-input" id="kg-growth" placeholder="подписчики">
+        </div>
+        
+        <div class="kpi-item">
+            <div class="kpi-name">Соблюдение контент-плана</div>
+            <div class="kpi-description">Минимум: 100% публикаций вовремя (10 баллов)</div>
+            <input type="number" class="kpi-input" id="kg-schedule" placeholder="%" max="100">
+        </div>
+        
+        <button onclick="calculateKG()" style="background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Рассчитать</button>
+        
+        <div class="total-section">
+            <div class="total-points" id="kg-total">0 баллов</div>
+            <div id="kg-percentage">0%</div>
+        </div>
+        
+        <div class="bonus-section">
+            <h3>💰 Бонус за месяц:</h3>
+            <div class="bonus-amount" id="kg-bonus">0 сом</div>
+        </div>
+    </div>
+    
+    <script>
+        function showCalculator() {
+            const position = document.getElementById('position').value;
+            const calculators = document.querySelectorAll('.calculator');
+            
+            calculators.forEach(calc => calc.classList.remove('active'));
+            
+            if (position) {
+                document.getElementById(position).classList.add('active');
+            }
+        }
+        
+        function calculatePoints(actual, minimum, maxPoints) {
+            if (actual >= minimum) {
+                return maxPoints;
+            } else {
+                return Math.max(0, Math.round((actual / minimum) * maxPoints));
+            }
+        }
+        
+        function calculateBonus(totalPoints) {
+            if (totalPoints >= 140) return 40000;
+            if (totalPoints >= 130) return 20000;
+            if (totalPoints >= 120) return 10000;
+            if (totalPoints >= 110) return 5000;
+            return 0;
+        }
+        
+        function calculateRU() {
+            const engagement = parseFloat(document.getElementById('ru-engagement').value) || 0;
+            const views = parseFloat(document.getElementById('ru-views').value) || 0;
+            const materials = parseFloat(document.getElementById('ru-materials').value) || 0;
+            const growth = parseFloat(document.getElementById('ru-growth').value) || 0;
+            const schedule = parseFloat(document.getElementById('ru-schedule').value) || 0;
+            
+            const engagementPoints = calculatePoints(engagement, 5, 30);
+            const viewsPoints = calculatePoints(views, 50000, 30);
+            const materialsPoints = calculatePoints(materials, 12, 20);
+            const growthPoints = calculatePoints(growth, 1000, 10);
+            const schedulePoints = calculatePoints(schedule, 100, 10);
+            
+            const totalPoints = engagementPoints + viewsPoints + materialsPoints + growthPoints + schedulePoints;
+            const totalPercent = Math.round((totalPoints / 100) * 100);
+            
+            document.getElementById('ru-total').textContent = totalPoints + ' баллов';
+            document.getElementById('ru-percentage').textContent = totalPercent + '%';
+            
+            const bonus = calculateBonus(totalPoints);
+            document.getElementById('ru-bonus').textContent = bonus.toLocaleString() + ' сом';
+        }
+        
+        function calculateKG() {
+            const engagement = parseFloat(document.getElementById('kg-engagement').value) || 0;
+            const views = parseFloat(document.getElementById('kg-views').value) || 0;
+            const materials = parseFloat(document.getElementById('kg-materials').value) || 0;
+            const growth = parseFloat(document.getElementById('kg-growth').value) || 0;
+            const schedule = parseFloat(document.getElementById('kg-schedule').value) || 0;
+            
+            const engagementPoints = calculatePoints(engagement, 5, 30);
+            const viewsPoints = calculatePoints(views, 50000, 30);
+            const materialsPoints = calculatePoints(materials, 7, 20);
+            const growthPoints = calculatePoints(growth, 1000, 10);
+            const schedulePoints = calculatePoints(schedule, 100, 10);
+            
+            const totalPoints = engagementPoints + viewsPoints + materialsPoints + growthPoints + schedulePoints;
+            const totalPercent = Math.round((totalPoints / 100) * 100);
+            
+            document.getElementById('kg-total').textContent = totalPoints + ' баллов';
+            document.getElementById('kg-percentage').textContent = totalPercent + '%';
+            
+            const bonus = calculateBonus(totalPoints);
+            document.getElementById('kg-bonus').textContent = bonus.toLocaleString() + ' сом';
+        }
+    </script>
+</body>
+</html>
