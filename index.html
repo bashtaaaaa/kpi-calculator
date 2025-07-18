@@ -685,10 +685,10 @@
                     </tr>
                     <tr>
                         <td class="kpi-name">Процент принятых сценариев</td>
-                        <td class="metric-value">%</td>
-                        <td class="metric-value">80%</td>
-                        <td class="metric-value">90%</td>
-                        <td class="metric-value">95%</td>
+                        <td class="metric-value">принято/всего</td>
+                        <td class="metric-value">8/10</td>
+                        <td class="metric-value">9/10</td>
+                        <td class="metric-value">10/10</td>
                         <td class="points-value">20</td>
                         <td class="weight-value">20%</td>
                         <td class="kpi-formula">Принятые сценарии / Всего сценариев × 100</td>
@@ -707,10 +707,10 @@
                     </tr>
                     <tr>
                         <td class="kpi-name">Соблюдение дедлайнов</td>
-                        <td class="metric-value">%</td>
-                        <td class="metric-value">85%</td>
-                        <td class="metric-value">95%</td>
-                        <td class="metric-value">100%</td>
+                        <td class="metric-value">в срок/всего</td>
+                        <td class="metric-value">7/8</td>
+                        <td class="metric-value">8/8</td>
+                        <td class="metric-value">8/8</td>
                         <td class="points-value">10</td>
                         <td class="weight-value">10%</td>
                         <td class="kpi-formula">Сданы вовремя / Всего заданий × 100</td>
@@ -853,8 +853,12 @@
                         <input type="number" id="op-creativity" min="1" max="10" step="0.1" placeholder="8.0">
                     </div>
                     <div class="calc-input">
-                        <label>Соблюдение дедлайнов (%)</label>
-                        <input type="number" id="op-deadline" placeholder="95">
+                        <label>Сданы в срок</label>
+                        <input type="number" id="op-ontime-count" placeholder="в срок">
+                    </div>
+                    <div class="calc-input">
+                        <label>Всего заданий</label>
+                        <input type="number" id="op-deadline-total" placeholder="всего">
                     </div>
                 </div>
                 <button class="calc-btn" onclick="calculateOperator()">🔢 Рассчитать KPI</button>
@@ -1398,18 +1402,25 @@
             document.getElementById('kg-result').classList.add('show');
         }
         
+        // Сценарист
         function calculateScriptwriter() {
             const quality = parseFloat(document.getElementById('scr-quality').value) || 0;
             const count = parseFloat(document.getElementById('scr-count').value) || 0;
-            const accepted = parseFloat(document.getElementById('scr-accepted').value) || 0;
+            const acceptedCount = parseFloat(document.getElementById('scr-accepted-count').value) || 0;
+            const totalCount = parseFloat(document.getElementById('scr-total-count').value) || 0;
             const creative = parseFloat(document.getElementById('scr-creative').value) || 0;
-            const deadline = parseFloat(document.getElementById('scr-deadline').value) || 0;
+            const ontimeCount = parseFloat(document.getElementById('scr-ontime-count').value) || 0;
+            const deadlineTotal = parseFloat(document.getElementById('scr-deadline-total').value) || 0;
+            
+            // Рассчитываем проценты из введенных чисел
+            const acceptedPercent = totalCount > 0 ? (acceptedCount / totalCount) * 100 : 0;
+            const deadlinePercent = deadlineTotal > 0 ? (ontimeCount / deadlineTotal) * 100 : 0;
             
             const qualityPoints = calculateKPI(quality, 7, 8, 9, 30);
             const countPoints = calculateKPI(count, 6, 8, 10, 20);
-            const acceptedPoints = calculateKPI(accepted, 80, 90, 95, 20);
+            const acceptedPoints = calculateKPI(acceptedPercent, 80, 90, 95, 20);
             const creativePoints = calculateKPI(creative, 3, 4, 6, 20);
-            const deadlinePoints = calculateKPI(deadline, 85, 95, 100, 10);
+            const deadlinePoints = calculateKPI(deadlinePercent, 85, 95, 100, 10);
             
             const totalPoints = qualityPoints + countPoints + acceptedPoints + creativePoints + deadlinePoints;
             const percentage = Math.round(totalPoints);
@@ -1553,7 +1564,11 @@
             const count = parseFloat(document.getElementById('op-count').value) || 0;
             const quality = parseFloat(document.getElementById('op-quality').value) || 0;
             const creativity = parseFloat(document.getElementById('op-creativity').value) || 0;
-            const deadline = parseFloat(document.getElementById('op-deadline').value) || 0;
+            const ontimeCount = parseFloat(document.getElementById('op-ontime-count').value) || 0;
+            const deadlineTotal = parseFloat(document.getElementById('op-deadline-total').value) || 0;
+            
+            // Рассчитываем процент дедлайнов
+            const deadlinePercent = deadlineTotal > 0 ? (ontimeCount / deadlineTotal) * 100 : 0;
             
             // Для времени - инвертируем (меньше = лучше)
             const timeValue = time > 0 ? Math.max(0, 2 - time) : 0;
@@ -1561,7 +1576,7 @@
             const countPoints = calculateKPI(count, 6, 8, 10, 20);
             const qualityPoints = calculateKPI(quality, 7, 8, 9, 20);
             const creativityPoints = calculateKPI(creativity, 7, 8, 9, 20);
-            const deadlinePoints = calculateKPI(deadline, 85, 95, 100, 10);
+            const deadlinePoints = calculateKPI(deadlinePercent, 85, 95, 100, 10);
             
             const totalPoints = timePoints + countPoints + qualityPoints + creativityPoints + deadlinePoints;
             const percentage = Math.round(totalPoints);
